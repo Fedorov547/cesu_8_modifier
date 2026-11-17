@@ -24,3 +24,10 @@ The deliberate trade-off is strictness. Malformed input — overlong encodings, 
 ## The awkward edge
 
 A high surrogate that is not followed by a low surrogate is an error, not a replacement character. That means `decode(b"\xED\xA0\xBD")` raises. This is intentional: in CESU-8, a lone surrogate is never a valid encoding of anything, and treating it as U+FFFD would hide data corruption. If you are decoding a stream that may legitimately contain lone surrogates (some Java `String` instances do), you must handle them before calling this decoder.
+
+## Performance
+
+The window keeps a bounded buffer, so `push` is constant time and memory does not
+grow with the length of the stream. `peak` and `trough` are linear in the window
+size, which is the trade that keeps `push` cheap.
+
